@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bybit-exchange/skills/options-wheel/strategy_spec.schema.json",
+  "title": "Bybit Options Wheel Strategy Spec",
+  "description": "Persistent strategy specification consumed by the agent runtime. Emitted by the control plane (Skill Hub form or chat agent) and rendered by the dashboard.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["skillId", "symbol", "mode", "riskTier", "maxDrawdown"],
+  "properties": {
+    "skillId": {
+      "type": "string",
+      "const": "bybit-options-wheel",
+      "description": "Identifies this spec as an Options Wheel strategy."
+    },
+    "skillVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Skill version this spec targets (semver)."
+    },
+    "subaccountId": {
+      "type": "string",
+      "description": "Bybit AI Subaccount ID where the strategy runs."
+    },
+    "strategyId": {
+      "type": "string",
+      "description": "Unique ID assigned by runtime after activation; absent in initial submission."
+    },
+    "symbol": {
+      "type": "string",
+      "default": "BTC",
+      "description": "Underlying base coin. Maps to Bybit baseCoin filter (not the contract symbol). Accepts any baseCoin currently listed by Bybit for options — validate at runtime via GET /v5/market/instruments-info?category=option&baseCoin=<symbol>. As of 2026-07-15 the listed set is BTC, ETH, SOL, XAUT, XRP, DOGE; non-BTC/ETH books are thinner, so expect wider spreads and occasional no-match rounds."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["A", "B", "C", "D"],
+      "default": "D",
+      "description": "A=Sell Put Loop, B=Sell Call Loop, C=Sequential Put↔Call Rotation (one leg at a time, alternates each round), D=AI Smart Switch (per-round Skew-driven, may sell both simultaneously when balanced)."
+    },
+    "riskTier": {
+      "type": "string",
+      "enum": ["conservative", "standard", "aggressive"],
+      "default": "standard",
+      "description": "Target Delta band. Conservative=0.15-0.20, Standard=0.20-0.25, Aggressive=0.25-0.35. Standard is the recommended default — backtest over the past 12mo showed Conservative underperformed (premium too thin to cover ITM losses)."
+    },
+    "orderQty": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Literal contract qty placed per leg. Must satisfy lotSizeFilter.minOrderQty and qtyStep for the chosen symbol. Always read minOrderQty from GET /v5/market/instruments-info at runtime — do not hardcode. Reference values as of 2026-07-15: BTC 0.01, ETH 0.1, SOL 1, XAUT 0.1, XRP 10, DOGE 100. Users who prefer % language (\"仓位 X%\") are translated to orderQty at runtime — see SKILL.md §Position Sizing."
+    },
+    "positionRatio": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "maximum": 1.0,
+      "default": null,
+      "description": "OPTIONAL. Fraction of available USDT the user asked for in % language. Runtime translates to orderQty (see Skill.md §Position Sizing) and populates the derived orderQty. If both fields are set, orderQty wins."
+    },
+    "preferredExpiryDays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30,
+      "default": 7,
+      "description": "Preferred days to expiry. Runtime may pick 14d if premium uplift > 30%."
+    },
+    "targetAnnualYield": {
+      "type": ["number", "null"],
+      "minimum": 0.05,
+      "maximum": 2.0,
+      "default": null,
+      "description": "Optional target annualised yield. Influences position sizing in Pro mode."
+    },
+    "maxDrawdown": {
+      "type": "number",
+      "minimum": 0.05,
+      "maximum": 0.50,
+      "default": 0.20,
+      "description": "Max drawdown limit as fraction of subaccount equity. Trip → agent auto-cancels unfilled wheel orders + auto-buys-to-close all wheel positions (no fresh CONFIRM needed — the maxDrawdown setting IS the pre-authorisation). Strategy then pauses; user must type CONFIRM-RESUME to reactivate."
+    },
+    "skewDelta": {
+      "type": "number",
+      "minimum": 0.10,
+      "maximum": 0.40,
+      "default": 0.25,
+      "description": "Delta level used for Vol Skew comparison (Mode D)."
+    },
+    "skewThresholdPp": {
+      "type": "number",
+      "minimum": 1.0,
+      "maximum": 20.0,
+      "default": 5.0,
+      "description": "Skew magnitude (percentage points) above which AI Smart Switch picks a side."
+    },
+    "ivPercentileFloor": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 25,
+      "description": "Below this IV%ile, force conservative tier for the round."
+    },
+    "trendPausePct": {
+      "type": "number",
+      "minimum": 0.02,
+      "maximum": 0.30,
+      "default": 0.08,
+      "description": "24h move (absolute) above which the corresponding direction pauses new opens."
+    },
+    "trendResumePct": {
+      "type": "number",
+      "minimum": 0.01,
+      "maximum": 0.10,
+      "default": 0.03,
+      "description": "24h move below which a paused direction auto-resumes."
+    },
+    "autoRollEnabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable Auto-Roll at T-2d for Modes A/B/C. In continuous mode this fires WITHOUT a fresh CONFIRM (pre-authorised by the Step 3 CONFIRM); the agent buy-to-closes the current leg and opens next expiry when `next_premium > close_cost`. In single-shot mode roll requires CONFIRM-ALL. See Skill.md §Round Lifecycle → Auto-Roll."
+    },
+    "continuousMode": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true (default), the Step 3 CONFIRM authorises the wheel to auto-continue: auto-roll (Modes A/B/C at T-2d) and auto-open next round after settlement, both under the same params. Set false to force per-round CONFIRM — one round runs, then agent waits for a fresh CONFIRM before opening again. Runtime overrides this to false when Skill.md §Step 0 detects a single-shot host."
+    },
+    "notificationChannel": {
+      "type": "string",
+      "enum": ["app_push", "app_push+email", "webhook"],
+      "default": "app_push",
+      "description": "DEPRECATED for the chat-agent runtime — agent has no push channel and ignores this field. Retained only for the in-App Skill Hub form path (Bybit-side server runtime). The chat agent reports exclusively in the active chat session."
+    },
+    "webhookUrl": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "default": null,
+      "description": "Required when notificationChannel=webhook. Must be HTTPS."
+    },
+    "uiMode": {
+      "type": "string",
+      "enum": ["easy", "pro"],
+      "default": "easy",
+      "description": "Tracks which UI surface produced this spec (for analytics)."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when user activated the strategy."
+    }
+  },
+  "examples": [
+    {
+      "skillId": "bybit-options-wheel",
+      "skillVersion": "1.0.0",
+      "subaccountId": "aisub-abc123",
+      "symbol": "BTC",
+      "mode": "D",
+      "riskTier": "standard",
+      "orderQty": 0.01,
+      "positionRatio": null,
+      "preferredExpiryDays": 7,
+      "maxDrawdown": 0.20,
+      "skewDelta": 0.25,
+      "skewThresholdPp": 5.0,
+      "ivPercentileFloor": 25,
+      "trendPausePct": 0.08,
+      "trendResumePct": 0.03,
+      "autoRollEnabled": true,
+      "notificationChannel": "app_push",
+      "uiMode": "easy",
+      "createdAt": "2026-07-02T08:30:00Z"
+    },
+    {
+      "skillId": "bybit-options-wheel",
+      "skillVersion": "1.0.0",
+      "subaccountId": "aisub-def456",
+      "symbol": "ETH",
+      "mode": "C",
+      "riskTier": "aggressive",
+      "orderQty": 0.5,
+      "preferredExpiryDays": 14,
+      "targetAnnualYield": 0.45,
+      "maxDrawdown": 0.30,
+      "skewDelta": 0.30,
+      "skewThresholdPp": 8.0,
+      "ivPercentileFloor": 30,
+      "trendPausePct": 0.10,
+      "trendResumePct": 0.04,
+      "autoRollEnabled": false,
+      "notificationChannel": "webhook",
+      "webhookUrl": "https://example.com/wheel-hook",
+      "uiMode": "pro",
+      "createdAt": "2026-07-02T08:30:00Z"
+    },
+    {
+      "skillId": "bybit-options-wheel",
+      "skillVersion": "1.0.0",
+      "subaccountId": "aisub-ghi789",
+      "symbol": "SOL",
+      "mode": "A",
+      "riskTier": "standard",
+      "orderQty": 0.1,
+      "positionRatio": null,
+      "preferredExpiryDays": 7,
+      "maxDrawdown": 0.15,
+      "autoRollEnabled": true,
+      "notificationChannel": "app_push",
+      "uiMode": "easy",
+      "createdAt": "2026-07-02T09:00:00Z"
+    }
+  ]
+}
