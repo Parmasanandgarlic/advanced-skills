@@ -1,0 +1,282 @@
+{
+  "sourceRepository": "hububstudio/farmdashbeta",
+  "sourceCommit": "3b6a83dd5bfa239c85b68797bd27651294f335ab",
+  "tools": [
+    {
+      "name": "get_trail_heat",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_protocol_metadata",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "protocolId": {
+            "type": "string",
+            "description": "Protocol ID (e.g. \"hyperliquid\")"
+          }
+        },
+        "required": [
+          "protocolId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_protocol_risk_factors",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "protocolId": {
+            "type": "string",
+            "description": "Protocol ID to audit"
+          }
+        },
+        "required": [
+          "protocolId"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_chain_breakdown",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_agent_events",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_historical_trailheat",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "protocolId": {
+            "type": "string"
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365,
+            "default": 30
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "audit_sybil_risk",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "minItems": 1,
+            "maxItems": 10
+          }
+        },
+        "required": [
+          "addresses"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "simulate_points",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "totalVolumeUsd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "txCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "daysActive": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "walletBalanceUsd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "uniqueContracts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "isCexFundingOnly": {
+            "type": "boolean"
+          },
+          "protocolPoints": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "totalVolumeUsd",
+          "txCount",
+          "daysActive",
+          "walletBalanceUsd",
+          "uniqueContracts",
+          "isCexFundingOnly",
+          "protocolPoints"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_wallet_balances",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          },
+          "chains": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "get_token_prices",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "symbols": {
+            "type": "string"
+          },
+          "tokens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "optimize_portfolio",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "currentProtocols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "riskPreference": {
+            "type": "string",
+            "enum": [
+              "conservative",
+              "balanced",
+              "aggressive"
+            ]
+          },
+          "chains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "budget": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        },
+        "required": [
+          "currentProtocols",
+          "riskPreference"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    },
+    {
+      "name": "find_capital_route",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fromChainId": {
+            "type": "integer"
+          },
+          "toChainId": {
+            "type": "integer"
+          },
+          "fromToken": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$",
+            "description": "ERC-20 token contract address deployed on the corresponding chain. Do not pass a wallet/EOA; the token address and chain ID must match."
+          },
+          "toToken": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$",
+            "description": "ERC-20 token contract address deployed on the corresponding chain. Do not pass a wallet/EOA; the token address and chain ID must match."
+          },
+          "fromAmount": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "Amount in token base units."
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "lifi",
+              "relay"
+            ]
+          }
+        },
+        "required": [
+          "fromChainId",
+          "toChainId",
+          "fromToken",
+          "toToken",
+          "fromAmount"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      }
+    }
+  ]
+}
