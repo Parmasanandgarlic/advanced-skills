@@ -18,14 +18,14 @@ A standalone, third-party DeFi execution skill adapted from the canonical FarmDa
 - Review route fees, approvals, slippage, simulation, and transaction risk before local signing.
 - Reconcile a transaction already broadcast by the user's wallet or locally controlled agent.
 
-Do not use for Bybit orders, key custody, arbitrary calldata execution, promises of returns, or unattended production autonomy. Research-only requests must remain read-only; estimates do not authorize trades.
+Do not use for Bybit orders, key custody, arbitrary calldata execution, promises of returns, or activating unattended execution through this USER_SIGNED-only skill. Research-only requests must remain read-only; estimates do not authorize trades.
 
 ## Execution-mode truth
 
 | Mode | Current status | Signer and broadcaster | Boundary |
 |---|---|---|---|
 | `USER_SIGNED` | **operational**, default | Customer wallet or customer-controlled agent runtime | User approves each transaction; FarmDash prepares/simulates and never signs or broadcasts the compatibility swap |
-| `BOUNDED_AUTONOMOUS_AGENT_LOCAL_SIGNER` (status mode `BOUNDED_AUTONOMOUS`) | **preparation_only**, optional architecture | Customer-controlled agent runtime, locally | Revocable signed bounds can describe authority, but do not advertise funded production qualification or enable unattended execution |
+| `BOUNDED_AUTONOMOUS` | Separately authorized and scoped; verify live domain status | Customer-controlled agent runtime, locally | Requires an owner-signed policy, explicit limits and revocation. This submitted skill does not activate or execute this mode |
 | ERC-4337 server submission and generic server intent execution | **preparation_only** | No operational server-side broadcast path | Tool discovery, intent creation, and preparation are not execution |
 
 FarmDash is zero custody: it never requests, receives, stores, logs, or signs with user or agent private keys, seed phrases, mnemonics, or wallet exports. Do not require a specific wallet brand. Signing and broadcasting remain with the user's wallet/agent. An API key, session token, subscription, x402 payment, prepaid credit, or commercial-access grant buys API capacity, **not transaction authority**.
@@ -75,9 +75,9 @@ Use live status for providers and chains. Canonical supported EVM chains are Eth
 v1:FARMDASH_SWAP:{fromChainId}:{toChainId}:{fromToken}:{toToken}:{fromAmount}:{agentAddress}:{toAddress}:{nonce}
 ```
 
-## Optional bounded architecture: preparation only
+## Separately authorized bounded execution (outside this skill)
 
-The optional agent-local-signer design requires explicit, revocable signed delegation with protocol/router and asset allowlists, permitted chains/actions, per-transaction value limits, cumulative/session budgets, gas/slippage ceilings, expiry, cooldowns, and revocation. Missing, ambiguous, expired, or violated bounds fail closed. Session maintenance and preparation are not unattended execution. Keep `BOUNDED_AUTONOMOUS_AGENT_LOCAL_SIGNER=preparation_only`; fall back to operational interactive `USER_SIGNED`, or stop. Do not promote autonomy, implement a funded canary, or describe generic server-side execution as live.
+FarmDash's live status reports operational bounded execution for supported domains only under separately owner-signed, scoped policies and customer-local signing. This submission deliberately remains a USER_SIGNED spot workflow. Do not activate a delegated session, grant, local unattended signer or bounded execution from this skill. If requested, use a separate explicitly authorized domain workflow that verifies current deployment gates, allowlists, value/session budgets, simulation binding, expiry and revocation. API access, payment or session state never creates signing authority. ERC-4337 server submission, generic server-intent execution and MEE are not operational execution paths; ACP remains deployment-gated.
 
 ## Failure and evidence discipline
 
@@ -97,3 +97,5 @@ FarmDash may receive authorized public wallet and token addresses, chains, amoun
 Completion requires supported live capability, exact firm quote, fresh authoritative successful simulation, explicit confirmation, local signing/broadcast, and independently verified settlement. Report preparation as preparation and unavailable evidence as unavailable. DeFi carries irreversible-loss, smart-contract, bridge, liquidity, MEV, gas, and price risks; this skill offers no guarantee or investment advice.
 
 Canonical source: https://www.farmdash.one/openclaw-skills/farmdash-signal-architect/SKILL.md
+
+Contract verification: current MCP input schemas and live capability status checked on 2026-10-28 against canonical main `45196127e861f55fa3fb0e295dc4580a6bdfe4ad`. The source-adaptation commit above is historical provenance, not a claim that it is current main.

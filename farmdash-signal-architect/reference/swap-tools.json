@@ -8,20 +8,26 @@
         "type": "object",
         "properties": {
           "fromChainId": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "toChainId": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "fromToken": {
             "type": "string",
-            "pattern": "^0x[a-fA-F0-9]{40}$",
-            "description": "ERC-20 token contract address deployed on the corresponding chain. Do not pass a wallet/EOA; the token address and chain ID must match."
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Resolver-supported symbol, native identifier, token address, or chain-qualified asset; discovery resolves canonical assets server-side."
           },
           "toToken": {
             "type": "string",
-            "pattern": "^0x[a-fA-F0-9]{40}$",
-            "description": "ERC-20 token contract address deployed on the corresponding chain. Do not pass a wallet/EOA; the token address and chain ID must match."
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Resolver-supported symbol, native identifier, token address, or chain-qualified asset; discovery resolves canonical assets server-side."
           },
           "fromAmount": {
             "type": "string",
@@ -66,10 +72,50 @@
               "balanced"
             ]
           },
+          "continuationId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
           "idempotencyKey": {
             "type": "string",
             "minLength": 1,
             "maxLength": 128
+          },
+          "executionTrialProof": {
+            "description": "Locally signed commercial owner challenge; no transaction or delegation authority.",
+            "type": "object",
+            "properties": {
+              "issuedAt": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "signature": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "issuedAt",
+              "signature"
+            ]
+          },
+          "executionMode": {
+            "type": "string",
+            "enum": [
+              "USER_SIGNED",
+              "BOUNDED_AUTONOMOUS"
+            ]
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "sessionToken": {
+            "type": "string"
+          },
+          "grantId": {
+            "type": "string"
           }
         },
         "required": [
@@ -79,7 +125,6 @@
           "toToken",
           "fromAmount"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -101,7 +146,6 @@
           "intentId",
           "walletAddress"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -111,10 +155,14 @@
         "type": "object",
         "properties": {
           "fromChainId": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "toChainId": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "fromToken": {
             "type": "string",
@@ -174,7 +222,6 @@
           "signature",
           "simulationId"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -207,9 +254,11 @@
           "feeEventId",
           "txHash"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     }
-  ]
+  ],
+  "verifiedContractCommit": "45196127e861f55fa3fb0e295dc4580a6bdfe4ad",
+  "inputSchemaSource": "https://www.farmdash.one/.well-known/mcp.json",
+  "verifiedAt": "2026-10-28"
 }
