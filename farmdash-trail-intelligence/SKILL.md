@@ -40,7 +40,7 @@ For attribution, configure `FARMDASH_SKILL_ID=farmdash-trail-intelligence` in th
 
 ## Tool and endpoint contract
 
-Read [research input schemas](reference/research-tools.json) before forming calls. They are extracted from the canonical skill's JSON contract; current runtime discovery and response fields remain authoritative.
+Read [research input schemas](reference/research-tools.json) before forming calls. The focused tool set comes from the canonical skill; input schemas were refreshed from the live MCP manifest on 2026-10-28. Current runtime discovery and response fields remain authoritative.
 
 | MCP tool | HTTP research surface | Usage |
 |---|---|---|
@@ -81,3 +81,5 @@ Validate that every tool called is read-only, every numeric claim has evidence, 
 FarmDash and its upstream RPC/data providers may receive authorized public wallet addresses, research parameters, optional FarmDash bearer tokens, and attribution metadata. Public addresses can be linked to a user; obtain consent for wallet-specific research. Never request, receive, log, or transmit private keys, seed phrases, mnemonics, wallet exports, Bybit credentials, or account passwords. Smart-contract, liquidity, bridge, price, and speculative-airdrop risks remain even when a score is high.
 
 Canonical source: https://www.farmdash.one/openclaw-skills/farmdash-trail-intelligence/SKILL.md
+
+Contract verification: current MCP input schemas and live capability status checked on 2026-10-28 against canonical main `45196127e861f55fa3fb0e295dc4580a6bdfe4ad`. The source-adaptation commit above is historical provenance, not a claim that it is current main.

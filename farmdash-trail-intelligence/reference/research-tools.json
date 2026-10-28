@@ -7,8 +7,8 @@
       "inputSchema": {
         "type": "object",
         "properties": {},
-        "additionalProperties": false,
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
       }
     },
     {
@@ -24,7 +24,6 @@
         "required": [
           "protocolId"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -41,7 +40,6 @@
         "required": [
           "protocolId"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -50,16 +48,28 @@
       "inputSchema": {
         "type": "object",
         "properties": {},
-        "additionalProperties": false,
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
       }
     },
     {
       "name": "get_agent_events",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "additionalProperties": false,
+        "properties": {
+          "sessionId": {
+            "type": "string"
+          },
+          "agentAddress": {
+            "type": "string",
+            "pattern": "^0x[a-fA-F0-9]{40}$"
+          },
+          "sessionToken": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 256
+          }
+        },
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -72,13 +82,12 @@
             "type": "string"
           },
           "days": {
+            "default": 30,
             "type": "integer",
             "minimum": 1,
-            "maximum": 365,
-            "default": 30
+            "maximum": 365
           }
         },
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -88,19 +97,18 @@
         "type": "object",
         "properties": {
           "addresses": {
+            "minItems": 1,
+            "maxItems": 10,
             "type": "array",
             "items": {
               "type": "string",
               "pattern": "^0x[a-fA-F0-9]{40}$"
-            },
-            "minItems": 1,
-            "maxItems": 10
+            }
           }
         },
         "required": [
           "addresses"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -115,11 +123,13 @@
           },
           "txCount": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 9007199254740991
           },
           "daysActive": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 9007199254740991
           },
           "walletBalanceUsd": {
             "type": "number",
@@ -127,13 +137,17 @@
           },
           "uniqueContracts": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "maximum": 9007199254740991
           },
           "isCexFundingOnly": {
             "type": "boolean"
           },
           "protocolPoints": {
             "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
             "additionalProperties": {
               "type": "number"
             }
@@ -148,7 +162,6 @@
           "isCexFundingOnly",
           "protocolPoints"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -168,7 +181,6 @@
         "required": [
           "address"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -181,13 +193,14 @@
             "type": "string"
           },
           "tokens": {
+            "maxItems": 50,
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 128
             }
           }
         },
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -197,9 +210,11 @@
         "type": "object",
         "properties": {
           "currentProtocols": {
+            "maxItems": 50,
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 128
             }
           },
           "riskPreference": {
@@ -229,7 +244,6 @@
           "currentProtocols",
           "riskPreference"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     },
@@ -239,20 +253,26 @@
         "type": "object",
         "properties": {
           "fromChainId": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "toChainId": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           },
           "fromToken": {
             "type": "string",
-            "pattern": "^0x[a-fA-F0-9]{40}$",
-            "description": "ERC-20 token contract address deployed on the corresponding chain. Do not pass a wallet/EOA; the token address and chain ID must match."
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Resolver-supported symbol, native identifier, token address, or chain-qualified asset; discovery resolves canonical assets server-side."
           },
           "toToken": {
             "type": "string",
-            "pattern": "^0x[a-fA-F0-9]{40}$",
-            "description": "ERC-20 token contract address deployed on the corresponding chain. Do not pass a wallet/EOA; the token address and chain ID must match."
+            "minLength": 1,
+            "maxLength": 128,
+            "description": "Resolver-supported symbol, native identifier, token address, or chain-qualified asset; discovery resolves canonical assets server-side."
           },
           "fromAmount": {
             "type": "string",
@@ -274,9 +294,11 @@
           "toToken",
           "fromAmount"
         ],
-        "additionalProperties": false,
         "$schema": "http://json-schema.org/draft-07/schema#"
       }
     }
-  ]
+  ],
+  "verifiedContractCommit": "45196127e861f55fa3fb0e295dc4580a6bdfe4ad",
+  "inputSchemaSource": "https://www.farmdash.one/.well-known/mcp.json",
+  "verifiedAt": "2026-10-28"
 }
